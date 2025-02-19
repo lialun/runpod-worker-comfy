@@ -5,7 +5,12 @@ TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"
 
 # there are requirement files in the custom_nodes folder, so we need to install them
-cd /workspace/ComfyUI/custom_nodes && \
+cd /comfyui/custom_nodes && \
+    for req in $(find . -name "requirements.txt"); do \
+        pip3 install -r $req; \
+    done
+
+cd /runpod-volume/custom_nodes && \
     for req in $(find . -name "requirements.txt"); do \
         pip3 install -r $req; \
     done

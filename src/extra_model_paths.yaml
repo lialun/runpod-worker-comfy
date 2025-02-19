@@ -13,4 +13,5 @@ runpod_worker_comfy:
   instantid: models/instantid/
   text_encoders: models/text_encoders/
   diffusers: models/diffusers/
+  insightface: insightface/
   custom_nodes: custom_nodes/

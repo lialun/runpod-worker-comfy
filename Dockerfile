@@ -14,15 +14,17 @@ ENV VIRTUAL_ENV=/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install Python, git and other necessary tools
-RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
+RUN apt-get update && apt install software-properties-common -y && add-apt-repository ppa:deadsnakes/ppa &&\
+    apt-get install -y \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
     python3-pip \
     git \
     wget \
     libgl1 \
     libgtk2.0-dev \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python \
+    && ln -sf /usr/bin/python3.12 /usr/bin/python \
     && python -m venv $VIRTUAL_ENV \
     && pip install --upgrade pip
 
