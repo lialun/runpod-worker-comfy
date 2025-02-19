@@ -10,3 +10,7 @@ runpod_worker_comfy:
   upscale_models: models/upscale_models/
   vae: models/vae/
   unet: models/unet/
+  instantid: models/instantid/
+  text_encoders: models/text_encoders/
+  diffusers: models/diffusers/
+  custom_nodes: custom_nodes/
