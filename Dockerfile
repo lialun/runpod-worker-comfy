@@ -41,7 +41,7 @@ RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvid
 WORKDIR /comfyui
 
 # Install runpod using virtual environment
-RUN pip install runpod requests
+RUN pip install runpod requests numba colour-science rembg pixeloe transparent-background insightface==0.7.3 onnxruntime onnxruntime-gpu colorama diffusers accelerate "clip_interrogator>=0.6.0" lark opencv-python sentencepiece spandrel matplotlib peft GitPython PyGithub matrix-client==0.4.0 transformers huggingface-hub>0.20 typer rich typing-extensions toml uv chardet clip-interrogator simpleeval cython facexlib ftfy timm numpy
 
 # Support for the network volume
 ADD src/extra_model_paths.yaml ./
