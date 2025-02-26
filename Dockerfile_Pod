@@ -57,4 +57,4 @@ ADD src/start_pod.sh ./
 RUN chmod +x /start_pod.sh
 
 # Start container
-CMD ["/start_pod.sh"]
+CMD ["/bin/sh", "-c", "/start_pod.sh >> /var/log/start_comfyui.log 2>&1"]
