@@ -23,6 +23,8 @@ RUN apt-get update && apt install software-properties-common -y && add-apt-repos
     git \
     wget \
     libgl1 \
+    vim \
+    curl \
     libgtk2.0-dev \
     && ln -sf /usr/bin/python3.12 /usr/bin/python \
     && python -m venv $VIRTUAL_ENV \
