@@ -24,6 +24,7 @@ RUN apt-get update && apt install software-properties-common -y && add-apt-repos
     wget \
     libgl1 \
     libgtk2.0-dev \
+    unzip \
     && ln -sf /usr/bin/python3.12 /usr/bin/python \
     && python -m venv $VIRTUAL_ENV \
     && pip install --upgrade pip
@@ -62,38 +63,34 @@ RUN /restore_snapshot.sh
 # Start container
 CMD ["/start.sh"]
 
+
 # Stage 2: Download models
 FROM base as downloader
-
-ARG HUGGINGFACE_ACCESS_TOKEN
-ARG MODEL_TYPE
-
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Create necessary directories
-RUN mkdir -p models/checkpoints models/vae
+RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/clip /comfyui/models/vae/flux/ /comfyui/models/loras/flux/ /comfyui/models/pulid/ /comfyui/models/insightface/models/ /comfyui/models/facexlib/
 
-# Download checkpoints/vae/LoRA to include in image based on model type
+# Download  models
+#       COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
 RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
-wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors && \
-      wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
-      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
-      wget -O models/vae/flux/flux-ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors && \
-      wget -O models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
-      wget -O models/pulid/pulid_flux_v0.9.1.safetensors https://huggingface.co/guozinan/PuLID/resolve/main/pulid_flux_v0.9.1.safetensors; \
+      COPY cache/clip_l.safetensors /comfyui/models/clip/clip_l.safetensors && \
+      COPY cache/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/t5xxl_fp8_e4m3fn.safetensors && \
+      COPY cache/flux-ae.safetensors /comfyui/models/vae/flux/flux-ae.safetensors && \
+      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors /comfyui/models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
+      COPY cache/pulid_flux_v0.9.1.safetensors /comfyui/models/pulid/pulid_flux_v0.9.1.safetensors && \
+      COPY cache/antelopev2.zip /comfyui/models/insightface/models/antelopev2.zip && \
+      unzip -d /comfyui/models/insightface/models/ /comfyui/models/insightface/models/antelopev2.zip && \
+      COPY cache/parsing_bisenet.pth /comfyui/models/facexlib/parsing_bisenet.pth && \
+      COPY cache/detection_Resnet50_Final.pth /comfyui/models/facexlib/detection_Resnet50_Final.pth ; \
     elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
-      wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors && \
-      wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
-      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
-      wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors; \
+      COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
+      COPY cache/clip_l.safetensors /comfyui/models/clip/clip_l.safetensors && \
+      COPY cache/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/t5xxl_fp8_e4m3fn.safetensors && \
+      COPY cache/flux-ae.safetensors /comfyui/models/vae/flux/flux-ae.safetensors && \
+      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors /comfyui/models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors ; \
     fi
-
-# Stage 3: Final image
-FROM base as final
-
-# Copy models from stage 2 to the final image
-COPY --from=downloader /comfyui/models /comfyui/models
 
 # Start container
 CMD ["/start.sh"]
