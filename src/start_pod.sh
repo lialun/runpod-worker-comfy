@@ -17,7 +17,7 @@ cd /runpod-volume/custom_nodes && \
 
 # start comfyui    
 echo "runpod-pod-comfy: Starting ComfyUI"
-python3 /comfyui/main.py --auto-launch --listen --disable-metadata >> /var/log/comfy.log 2>&1 &
+python3 /comfyui/main.py --auto-launch --listen --disable-metadata --cuda-device  >> /var/log/comfy.log 2>&1 &
 
 # Keep the container running indefinitely
 sleep infinity

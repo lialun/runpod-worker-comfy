@@ -35,13 +35,13 @@ RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 RUN pip install comfy-cli
 
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.3.14
+RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.3.14 --skip-manager
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Install runpod using virtual environment
-RUN pip install runpod requests numba colour-science rembg pixeloe transparent-background insightface==0.7.3 onnxruntime onnxruntime-gpu colorama diffusers accelerate "clip_interrogator>=0.6.0" lark opencv-python sentencepiece spandrel matplotlib peft GitPython PyGithub matrix-client==0.4.0 transformers huggingface-hub>0.20 typer rich typing-extensions toml uv chardet clip-interrogator simpleeval cython facexlib ftfy timm numpy
+RUN pip install xformers runpod requests numba colour-science rembg pixeloe transparent-background insightface==0.7.3 onnxruntime onnxruntime-gpu colorama diffusers accelerate "clip_interrogator>=0.6.0" lark opencv-python sentencepiece spandrel matplotlib peft GitPython PyGithub matrix-client==0.4.0 transformers huggingface-hub>0.20 typer rich typing-extensions toml uv chardet clip-interrogator simpleeval cython facexlib ftfy timm numpy
 
 # Support for the network volume
 ADD src/extra_model_paths.yaml ./
@@ -61,3 +61,40 @@ RUN /restore_snapshot.sh
 
 # Start container
 CMD ["/start.sh"]
+
+# Stage 2: Download models
+FROM base as downloader
+
+ARG HUGGINGFACE_ACCESS_TOKEN
+ARG MODEL_TYPE
+
+# Change working directory to ComfyUI
+WORKDIR /comfyui
+
+# Create necessary directories
+RUN mkdir -p models/checkpoints models/vae
+
+# Download checkpoints/vae/LoRA to include in image based on model type
+RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
+wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors && \
+      wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
+      wget -O models/vae/flux/flux-ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors; && \
+      wget -O models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-FLUX.1-dev-8steps-lora.safetensors; && \
+      wget -O models/pulid/pulid_flux_v0.9.1.safetensors https://huggingface.co/guozinan/PuLID/resolve/main/pulid_flux_v0.9.1.safetensors; && \
+    elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
+      wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/unet/flux1-dev.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors && \
+      wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
+      wget --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors; \
+    fi
+
+# Stage 3: Final image
+FROM base as final
+
+# Copy models from stage 2 to the final image
+COPY --from=downloader /comfyui/models /comfyui/models
+
+# Start container
+CMD ["/start.sh"]
+

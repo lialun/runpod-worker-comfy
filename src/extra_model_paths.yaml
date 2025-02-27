@@ -14,5 +14,6 @@ runpod_worker_comfy:
   text_encoders: models/text_encoders/
   diffusers: models/diffusers/
   insightface: models/insightface/
+  facexlib: models/facexlib/
   pulid: models/pulid/
   custom_nodes: custom_nodes/
