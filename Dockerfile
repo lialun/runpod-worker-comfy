@@ -50,22 +50,22 @@ RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/cli
 # Download  models
 ARG MODEL_TYPE 
 RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
-      COPY cache/flux1-dev.safetensors models/unet/flux1-dev.safetensors && \
-      COPY cache/clip_l.safetensors models/clip/clip_l.safetensors && \
-      COPY cache/t5xxl_fp8_e4m3fn.safetensors models/clip/t5xxl_fp8_e4m3fn.safetensors && \
-      COPY cache/flux-ae.safetensors models/vae/flux/flux-ae.safetensors && \
-      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
-      COPY cache/pulid_flux_v0.9.1.safetensors models/pulid/pulid_flux_v0.9.1.safetensors && \
-      COPY cache/antelopev2.zip models/insightface/models/antelopev2.zip && \
+      wget -O models/unet/flux1-dev.safetensors http://localhost:8000/flux1-dev.safetensors && \
+      wget -O models/clip/clip_l.safetensors http://localhost:8000/clip_l.safetensors && \
+      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors http://localhost:8000/t5xxl_fp8_e4m3fn.safetensors && \
+      wget -O models/vae/flux/flux-ae.safetensors http://localhost:8000/flux-ae.safetensors && \
+      wget -O models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors http://localhost:8000/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
+      wget -O models/pulid/pulid_flux_v0.9.1.safetensors http://localhost:8000/pulid_flux_v0.9.1.safetensors && \
+      wget -O models/insightface/models/antelopev2.zip http://localhost:8000/antelopev2.zip && \
       unzip -d models/insightface/models/ models/insightface/models/antelopev2.zip && \
-      COPY cache/parsing_bisenet.pth models/facexlib/parsing_bisenet.pth && \
-      COPY cache/detection_Resnet50_Final.pth models/facexlib/detection_Resnet50_Final.pth ; \
+      wget -O models/facexlib/parsing_bisenet.pth http://localhost:8000/parsing_bisenet.pth && \
+      wget -O models/facexlib/detection_Resnet50_Final.pth http://localhost:8000/detection_Resnet50_Final.pth ; \
     elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
-      COPY cache/flux1-dev.safetensors models/unet/flux1-dev.safetensors && \
-      COPY cache/clip_l.safetensors models/clip/clip_l.safetensors && \
-      COPY cache/t5xxl_fp8_e4m3fn.safetensors models/clip/t5xxl_fp8_e4m3fn.safetensors && \
-      COPY cache/flux-ae.safetensors models/vae/flux/flux-ae.safetensors && \
-      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors ; \
+      wget -O models/unet/flux1-dev.safetensors http://localhost:8000/flux1-dev.safetensors && \
+      wget -O models/clip/clip_l.safetensors http://localhost:8000/clip_l.safetensors && \
+      wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors http://localhost:8000/t5xxl_fp8_e4m3fn.safetensors && \
+      wget -O models/vae/flux/flux-ae.safetensors http://localhost:8000/flux-ae.safetensors && \
+      wget -O models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors http://localhost:8000/Hyper-FLUX.1-dev-8steps-lora.safetensors ; \
     fi
 
 # Support for the network volume
