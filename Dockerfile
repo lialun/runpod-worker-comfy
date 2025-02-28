@@ -44,6 +44,29 @@ WORKDIR /comfyui
 # Install runpod using virtual environment
 RUN pip install xformers runpod requests numba colour-science rembg pixeloe transparent-background insightface==0.7.3 onnxruntime onnxruntime-gpu colorama diffusers accelerate "clip_interrogator>=0.6.0" lark opencv-python sentencepiece spandrel matplotlib peft GitPython PyGithub matrix-client==0.4.0 transformers huggingface-hub>0.20 typer rich typing-extensions toml uv chardet clip-interrogator simpleeval cython facexlib ftfy timm numpy
 
+# Create necessary directories
+RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/clip /comfyui/models/vae/flux/ /comfyui/models/loras/flux/ /comfyui/models/pulid/ /comfyui/models/insightface/models/ /comfyui/models/facexlib/
+
+# Download  models   
+RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
+      COPY cache/flux1-dev.safetensors models/unet/flux1-dev.safetensors && \
+      COPY cache/clip_l.safetensors models/clip/clip_l.safetensors && \
+      COPY cache/t5xxl_fp8_e4m3fn.safetensors models/clip/t5xxl_fp8_e4m3fn.safetensors && \
+      COPY cache/flux-ae.safetensors models/vae/flux/flux-ae.safetensors && \
+      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
+      COPY cache/pulid_flux_v0.9.1.safetensors models/pulid/pulid_flux_v0.9.1.safetensors && \
+      COPY cache/antelopev2.zip models/insightface/models/antelopev2.zip && \
+      unzip -d models/insightface/models/ models/insightface/models/antelopev2.zip && \
+      COPY cache/parsing_bisenet.pth models/facexlib/parsing_bisenet.pth && \
+      COPY cache/detection_Resnet50_Final.pth models/facexlib/detection_Resnet50_Final.pth ; \
+    elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
+      COPY cache/flux1-dev.safetensors models/unet/flux1-dev.safetensors && \
+      COPY cache/clip_l.safetensors models/clip/clip_l.safetensors && \
+      COPY cache/t5xxl_fp8_e4m3fn.safetensors models/clip/t5xxl_fp8_e4m3fn.safetensors && \
+      COPY cache/flux-ae.safetensors models/vae/flux/flux-ae.safetensors && \
+      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors ; \
+    fi
+
 # Support for the network volume
 ADD src/extra_model_paths.yaml ./
 
@@ -59,38 +82,6 @@ ADD *snapshot*.json /
 
 # Restore the snapshot to install custom nodes
 RUN /restore_snapshot.sh
-
-# Start container
-CMD ["/start.sh"]
-
-
-# Stage 2: Download models
-FROM base as downloader
-# Change working directory to ComfyUI
-WORKDIR /comfyui
-
-# Create necessary directories
-RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/clip /comfyui/models/vae/flux/ /comfyui/models/loras/flux/ /comfyui/models/pulid/ /comfyui/models/insightface/models/ /comfyui/models/facexlib/
-
-# Download  models   
-RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
-      COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
-      COPY cache/clip_l.safetensors /comfyui/models/clip/clip_l.safetensors && \
-      COPY cache/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/t5xxl_fp8_e4m3fn.safetensors && \
-      COPY cache/flux-ae.safetensors /comfyui/models/vae/flux/flux-ae.safetensors && \
-      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors /comfyui/models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors && \
-      COPY cache/pulid_flux_v0.9.1.safetensors /comfyui/models/pulid/pulid_flux_v0.9.1.safetensors && \
-      COPY cache/antelopev2.zip /comfyui/models/insightface/models/antelopev2.zip && \
-      unzip -d /comfyui/models/insightface/models/ /comfyui/models/insightface/models/antelopev2.zip && \
-      COPY cache/parsing_bisenet.pth /comfyui/models/facexlib/parsing_bisenet.pth && \
-      COPY cache/detection_Resnet50_Final.pth /comfyui/models/facexlib/detection_Resnet50_Final.pth ; \
-    elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
-      COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
-      COPY cache/clip_l.safetensors /comfyui/models/clip/clip_l.safetensors && \
-      COPY cache/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/t5xxl_fp8_e4m3fn.safetensors && \
-      COPY cache/flux-ae.safetensors /comfyui/models/vae/flux/flux-ae.safetensors && \
-      COPY cache/Hyper-FLUX.1-dev-8steps-lora.safetensors /comfyui/models/loras/flux/Hyper-FLUX.1-dev-8steps-lora.safetensors ; \
-    fi
 
 # Start container
 CMD ["/start.sh"]
