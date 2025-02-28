@@ -72,9 +72,9 @@ WORKDIR /comfyui
 # Create necessary directories
 RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/clip /comfyui/models/vae/flux/ /comfyui/models/loras/flux/ /comfyui/models/pulid/ /comfyui/models/insightface/models/ /comfyui/models/facexlib/
 
-# Download  models
-#       COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
+# Download  models   
 RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
+      COPY cache/flux1-dev.safetensors /comfyui/models/unet/flux1-dev.safetensors && \
       COPY cache/clip_l.safetensors /comfyui/models/clip/clip_l.safetensors && \
       COPY cache/t5xxl_fp8_e4m3fn.safetensors /comfyui/models/clip/t5xxl_fp8_e4m3fn.safetensors && \
       COPY cache/flux-ae.safetensors /comfyui/models/vae/flux/flux-ae.safetensors && \
