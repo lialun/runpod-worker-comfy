@@ -47,7 +47,8 @@ RUN pip install xformers runpod requests numba colour-science rembg pixeloe tran
 # Create necessary directories
 RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/vae /comfyui/models/clip /comfyui/models/vae/flux/ /comfyui/models/loras/flux/ /comfyui/models/pulid/ /comfyui/models/insightface/models/ /comfyui/models/facexlib/
 
-# Download  models   
+# Download  models
+ARG MODEL_TYPE 
 RUN if [ "$MODEL_TYPE" = "flux1-pulid" ]; then \
       COPY cache/flux1-dev.safetensors models/unet/flux1-dev.safetensors && \
       COPY cache/clip_l.safetensors models/clip/clip_l.safetensors && \
